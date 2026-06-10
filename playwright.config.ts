@@ -1,16 +1,23 @@
 import { defineConfig } from "@playwright/test";
-import dotenv from "dotenv";
+import { readFileSync } from "fs";
 import path from "path";
 
-dotenv.config({ path: path.join(__dirname, ".env") });
+const envVars = Object.fromEntries(
+  readFileSync(path.join(__dirname, ".env"), "utf8")
+    .split("\n")
+    .filter((l) => l.includes("=") && !l.startsWith("#"))
+    .map((l) => l.split("=").map((s) => s.trim()) as [string, string]),
+);
 
-const USERNAMES = (process.env.USERNAMES || "admin").split(",").filter(Boolean);
+const USERNAMES = (envVars.USERNAMES || "admin").split(",").filter(Boolean);
+
+console.log(USERNAMES);
 
 export default defineConfig({
   testDir: ".",
   timeout: 1200000, // 20 min per test
   workers: USERNAMES.length, // one worker per username = one browser per user
-
+  fullyParallel: true,
   use: {
     headless: true,
     viewport: { width: 1920, height: 1080 },
@@ -21,6 +28,9 @@ export default defineConfig({
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
         "--use-fake-ui-for-media-stream",
+        "--use-fake-device-for-media-stream",
+        "--auto-select-desktop-capture-source=Entire screen",
+        "--enable-features=WindowPlacement",
         "--use-fake-video-for-tests",
         "--disable-gpu",
       ],

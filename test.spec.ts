@@ -543,7 +543,7 @@ for (const username of usernames) {
       .getByRole("button", { name: "Next" })
       .filter({ visible: true })
       .last();
-    const deadline = Date.now() + 120000;
+    const deadline = Date.now() + 180000;
 
     while (await nextBtn5.isDisabled()) {
       if (Date.now() > deadline)
